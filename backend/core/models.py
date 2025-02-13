@@ -28,9 +28,19 @@ class School(models.Model):
     def __str__(self):
         return self.name
     
-class Grade(models.Model):
+class Grade(SoftDelete):
     name = models.CharField(max_length=10)
     school = models.ForeignKey(School, on_delete=models.CASCADE)
+
+    def soft_delete(self):
+        self.is_deleted = True
+        self.save()
+        self.student_set.update(is_deleted = True)
+
+    def restore(self):
+        self.is_deleted = False
+        self.save()
+        self.student_set.update(is_deleted = False)
 
     def __str__(self):
         return f"{self.school} - {self.name}"
